@@ -8,6 +8,12 @@ public class SC_Car : SC_PhysicObject
     [Header("Velocity")]
     public float current_velocity = 0;
 
+    protected override void Start()
+    {
+        base.Start();
+        start_mass = mass;
+    }
+
     protected override void FixedUpdate()
     {
         base.FixedUpdate();

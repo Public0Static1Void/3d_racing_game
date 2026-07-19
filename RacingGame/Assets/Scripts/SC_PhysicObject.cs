@@ -1,12 +1,15 @@
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 public class SC_PhysicObject : MonoBehaviour
 {
     [Header("Stats")]
     public float speed = 10f;
     public float mass = 1f;
+    [HideInInspector] public float start_mass;
     public float acceleration = 1f;
     public float rotation_speed = 1f;
+    public float terrain_rotate_speed = 10f;
     public float gravity_multipler = 1f;
     [Range(0, 1)]
     public float bounciness = 0.85f;
@@ -28,6 +31,10 @@ public class SC_PhysicObject : MonoBehaviour
     public float ground_friction = 0.9f;
     public float ground_detection_offset = 1;
     public bool onGround = false;
+    private float m_ground_timer = 0f;
+    public const float MAX_WALKABLE_ANGLE = 75;
+
+    private static readonly Vector3[] positions = { Vector3.right + Vector3.forward, Vector3.left + Vector3.forward, Vector3.right + Vector3.back, Vector3.left + Vector3.back };
     
 
     protected virtual void Start()
@@ -39,6 +46,15 @@ public class SC_PhysicObject : MonoBehaviour
 
     protected virtual void Update()
     {
+        if (!onGround)
+        {
+            m_ground_timer += Time.deltaTime;
+        }
+        else
+        {
+            m_ground_timer = 0;
+        }
+
         // Interpolate the current position and rotation
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         alpha = Mathf.Clamp01(alpha);
@@ -51,33 +67,36 @@ public class SC_PhysicObject : MonoBehaviour
         _pos_prev = _pos_current;
         _rot_prev = _rot_current;
 
-        if (_pos_current.z > 160)
-            _pos_current = new Vector3(_pos_current.x, _pos_current.y, 0);
-        if (_pos_current.z < 0)
-            _pos_current = new Vector3(_pos_current.x, _pos_current.y, 0);
-        if (_pos_current.x < -40)
-            _pos_current = new Vector3(5, _pos_current.y, _pos_current.z);
-        if (_pos_current.x > 40)
-            _pos_current = new Vector3(-5, _pos_current.y, _pos_current.z);
+        if (_pos_current.y < -80)
+        {
+            _pos_current = new Vector3(-50, 20, 30);
+        }
 
         bool start_on_ground = onGround;
-        RaycastHit hit = HandleGroundDetection();
+        
+        HandleWallCollision(ref velocity);
 
         // Check if it has to bounce
-        if (start_on_ground != onGround && onGround && velocity.y < -0.25f)
+        if (start_on_ground != onGround && onGround && velocity.y < -0.25f && m_ground_timer > 0.5f)
         {
             Bounce(ref velocity);
         }
-        
 
         HandleGravity(ref velocity);
-        HandlePenetration(hit, ref velocity);
-        
+
+
+        RaycastHit hit = new RaycastHit();
+        for (int i = 0; i < positions.Length; i++)
+        {
+            hit = HandleGroundDetection(positions[i]);
+
+            HandlePenetration(hit, positions.Length);
+            HandleGroundRotation(hit);
+        }
 
         float turn_amount = Mathf.Abs(rotation.y) / max_rotation.y;
         ApplyDrift(ref velocity, turn_amount);
 
-        
         HandleGroundFriction(ref velocity, false);
         HandleGroundFriction(ref rotation, true);
 
@@ -86,39 +105,81 @@ public class SC_PhysicObject : MonoBehaviour
 
         // Assign the current position and rotation
         _pos_current += velocity;
-
-        _rot_current *= Quaternion.Euler(rotation);
+        _rot_current *= Quaternion.Euler(0, rotation.y, 0);
     }
 
     private void Bounce(ref Vector3 vel)
     {
         vel.y *= -bounciness;
     }
-    private RaycastHit HandleGroundDetection()
+    private RaycastHit HandleGroundDetection(Vector3 offset)
     {
-        onGround = Physics.Raycast(_pos_current, Vector3.down, out RaycastHit hit, transform.localScale.y * ground_detection_offset, layer_ground);
+        Vector3 center = _pos_current + _rot_current * offset;
+        onGround = Physics.Raycast(center, Vector3.down, out RaycastHit hit, transform.localScale.y * ground_detection_offset, layer_ground);
         Color draw_col = onGround ? Color.green : Color.red;
-        Debug.DrawLine(_pos_current, _pos_current + Vector3.down * (transform.localScale.y * ground_detection_offset), draw_col);
+        Debug.DrawLine(center, center + Vector3.down * (transform.localScale.y * ground_detection_offset), draw_col);
 
         return hit;
     }
-    private void HandlePenetration(RaycastHit hit, ref Vector3 vel)
+
+    private void HandleWallCollision(ref Vector3 vel)
     {
-        if (hit.collider == null) return;
-        float penetration = transform.localScale.y - hit.distance;
-        if (penetration > 0)
+        float dist = vel.magnitude;
+        if (dist < 0.001f) return; /// Don't process when the car isn't moving
+
+        Vector3 dir = vel.normalized;
+        Vector3 dir_horizontal = new Vector3(dir.x, 0, dir.z);
+        dir_horizontal.Normalize();
+
+        if (Physics.SphereCast(_pos_current, transform.localScale.y, dir_horizontal, out RaycastHit hit, dist * 10, layer_ground))
         {
-            _pos_current += Vector3.up * penetration;
+            float slope_angle = Vector3.Angle(hit.normal, Vector3.up);
+            Debug.Log($"Colliding, slope: {slope_angle}");
+            if (slope_angle <= MAX_WALKABLE_ANGLE) return;
+
+            float allowed_dist = Mathf.Max(hit.distance, 0);
+            float scale = allowed_dist / dist;
+            vel *= scale;
+
+            Vector3 into_wall = Vector3.Project(vel, dir_horizontal);
+            vel -= into_wall;
         }
     }
+
+    private RaycastHit GetPositionHit(Vector3 offset)
+    {
+        Vector3 pos = _pos_current + _rot_current * offset;
+        Physics.Raycast(pos, -transform.up, out RaycastHit hit, transform.localScale.y * ground_detection_offset, layer_ground);
+        return hit;
+    }
+    private void HandleGroundRotation(RaycastHit hit)
+    {
+        if (!onGround) return;
+        Quaternion rot = Quaternion.FromToRotation(transform.up, hit.normal) * _rot_current;
+
+        _rot_current = Quaternion.Slerp(_rot_current, rot, Time.fixedDeltaTime * terrain_rotate_speed);
+    }
+    private void HandlePenetration(RaycastHit hit, int ray_num)
+    {
+        if (hit.collider == null) return;
+        float penetration = ground_detection_offset * transform.localScale.y - hit.distance;
+        if (penetration > 0)
+        {
+            _pos_current += Vector3.up * penetration / ray_num;
+        }
+    }
+
     private void HandleGravity(ref Vector3 vel)
     {
         if (onGround) return;
 
-        vel += Physics.gravity * gravity_multipler * Time.fixedDeltaTime;
+        float mass_multiplier = mass / start_mass;
+
+        vel += Physics.gravity * gravity_multipler * Time.fixedDeltaTime * mass_multiplier;
     }
     protected virtual void HandleGroundFriction(ref Vector3 vel, bool rotating)
     {
+        if (!onGround) return;
         vel *= ground_friction;
     }
     
