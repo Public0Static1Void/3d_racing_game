@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Assertions.Must;
 
@@ -35,13 +36,19 @@ public class SC_PhysicObject : MonoBehaviour
     public const float MAX_WALKABLE_ANGLE = 75;
 
     private static readonly Vector3[] positions = { Vector3.right + Vector3.forward, Vector3.left + Vector3.forward, Vector3.right + Vector3.back, Vector3.left + Vector3.back };
-    
+
+
+    private Vector3 m_start_position;
 
     protected virtual void Start()
     {
         // Store the current position and rotation
         _pos_current = transform.position;
         _rot_current = transform.rotation;
+
+        start_mass = mass;
+
+        m_start_position = transform.position;
     }
 
     protected virtual void Update()
@@ -69,12 +76,22 @@ public class SC_PhysicObject : MonoBehaviour
 
         if (_pos_current.y < -80)
         {
-            _pos_current = new Vector3(-50, 20, 30);
+            _pos_current = m_start_position;
+            velocity = Vector3.zero;
+            rotation = Vector3.zero;
         }
 
         bool start_on_ground = onGround;
-        
+
         HandleWallCollision(ref velocity);
+        RaycastHit hit = new RaycastHit();
+        for (int i = 0; i < positions.Length; i++)
+        {
+            hit = HandleGroundDetection(positions[i]);
+
+            HandlePenetration(hit, positions.Length);
+            HandleGroundRotation(hit);
+        }
 
         // Check if it has to bounce
         if (start_on_ground != onGround && onGround && velocity.y < -0.25f && m_ground_timer > 0.5f)
@@ -84,15 +101,6 @@ public class SC_PhysicObject : MonoBehaviour
 
         HandleGravity(ref velocity);
 
-
-        RaycastHit hit = new RaycastHit();
-        for (int i = 0; i < positions.Length; i++)
-        {
-            hit = HandleGroundDetection(positions[i]);
-
-            HandlePenetration(hit, positions.Length);
-            HandleGroundRotation(hit);
-        }
 
         float turn_amount = Mathf.Abs(rotation.y) / max_rotation.y;
         ApplyDrift(ref velocity, turn_amount);
@@ -125,24 +133,33 @@ public class SC_PhysicObject : MonoBehaviour
     private void HandleWallCollision(ref Vector3 vel)
     {
         float dist = vel.magnitude;
-        if (dist < 0.001f) return; /// Don't process when the car isn't moving
+        if (dist < 0.0001f) return; // only skip for genuinely zero movement
 
         Vector3 dir = vel.normalized;
         Vector3 dir_horizontal = new Vector3(dir.x, 0, dir.z);
+        if (dir_horizontal.sqrMagnitude < 0.0001f) return;
         dir_horizontal.Normalize();
 
-        if (Physics.SphereCast(_pos_current, transform.localScale.y, dir_horizontal, out RaycastHit hit, dist * 10, layer_ground))
+        Vector3 half_extents = transform.localScale * 0.5f;
+
+        if (Physics.BoxCast(_pos_current, half_extents, dir_horizontal, out RaycastHit hit, _rot_current, dist, layer_ground))
         {
-            float slope_angle = Vector3.Angle(hit.normal, Vector3.up);
-            Debug.Log($"Colliding, slope: {slope_angle}");
-            if (slope_angle <= MAX_WALKABLE_ANGLE) return;
+            // Don't process if the collider is trigger
+            if (hit.collider.isTrigger) return;
 
-            float allowed_dist = Mathf.Max(hit.distance, 0);
-            float scale = allowed_dist / dist;
-            vel *= scale;
+            float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+            if (slopeAngle <= MAX_WALKABLE_ANGLE) return;
 
-            Vector3 into_wall = Vector3.Project(vel, dir_horizontal);
-            vel -= into_wall;
+            // Reflect the ORIGINAL incoming velocity — this is the real bounce impulse
+            Vector3 reflected = Vector3.Reflect(vel, hit.normal) * bounciness;
+
+            // Clamp how far we're allowed to move THIS frame to the wall surface
+            float allowedDist = Mathf.Max(hit.distance - 0.05f, 0f);
+            float scale = allowedDist / dist;
+            vel = vel * scale + reflected * Time.fixedDeltaTime;
+            // small immediate correction toward the surface, but velocity carries the real bounce forward
+
+            vel = reflected; // persistent velocity for next frame uses the real bounce, not the shrunk one
         }
     }
 
