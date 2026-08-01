@@ -5,15 +5,10 @@ public class SC_Car : SC_PhysicObject
 {
     private Vector2 m_input;
 
-    [Header("Velocity")]
-    public float current_velocity = 0;
-
     protected override void FixedUpdate()
     {
         base.FixedUpdate();
         HandleInputSpeed(ref velocity, ref rotation);
-
-        current_velocity = velocity.magnitude * 3.6f; // Conversion to km/h
     }
 
     #region PhysicFunctions

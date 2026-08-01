@@ -22,7 +22,7 @@ public class SC_CheckpointManager : MonoBehaviour
 
     public Vector3 GetNextCheckpointPosition(int index)
     {
-        return checkpoints[index % checkpoints.Count].transform.position;
+        return checkpoints[index % checkpoints.Count].transform.position + Vector3.right * Random.Range(-5f, 5f);
     }
     public (Vector3, int) GetNearestCheckpoint(Vector3 position)
     {

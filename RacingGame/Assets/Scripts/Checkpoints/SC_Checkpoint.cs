@@ -1,11 +1,12 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(BoxCollider))]
 public class SC_Checkpoint : MonoBehaviour
 {
     private SC_CheckpointManager sc_CheckpointManager;
 
-    public SC_Car_npc npc;
+    private SC_Car_npc[] npcs;
     public bool opened = false;
     public float dist = 11;
 
@@ -19,6 +20,8 @@ public class SC_Checkpoint : MonoBehaviour
 
         sc_CheckpointManager = SC_CheckpointManager.instance;
 
+        npcs = FindObjectsByType<SC_Car_npc>(FindObjectsSortMode.None);
+
         if (check_point_num < 0)
             Debug.LogWarning("The checkpoint number must be assigned");
     }
@@ -27,7 +30,7 @@ public class SC_Checkpoint : MonoBehaviour
         if (opened)
         {
             m_timer += Time.deltaTime;
-            if (m_timer > 1)
+            if (m_timer > 0.1f)
             {
                 opened = false;
                 m_timer = 0;
@@ -35,11 +38,14 @@ public class SC_Checkpoint : MonoBehaviour
             return;
         }
 
-        dist = Vector3.Distance(transform.position, npc.transform.position);
-        if (dist < 10)
+        foreach (SC_Car_npc npc in npcs)
         {
-            npc.SetDestination(sc_CheckpointManager.GetNextCheckpointPosition(check_point_num + 1));
-            opened = true;
+            dist = Vector3.Distance(transform.position, npc.transform.position);
+            if (dist < 10)
+            {
+                npc.SetDestination(sc_CheckpointManager.GetNextCheckpointPosition(check_point_num + 1));
+                opened = true;
+            }
         }
     }
 }

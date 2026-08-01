@@ -26,6 +26,11 @@ public class SC_PhysicObject : MonoBehaviour
     private Vector3 _pos_prev, _pos_current;
     private Quaternion _rot_prev, _rot_current;
 
+    public float current_velocity = 0;
+
+    [Header("Collisions")]
+    public LayerMask layer_cars;
+
     [Header("Ground")]
     public LayerMask layer_ground;
     [Range(0, 1)]
@@ -38,7 +43,8 @@ public class SC_PhysicObject : MonoBehaviour
     private static readonly Vector3[] positions = { Vector3.right + Vector3.forward, Vector3.left + Vector3.forward, Vector3.right + Vector3.back, Vector3.left + Vector3.back };
 
 
-    private Vector3 m_start_position;
+    protected Vector3 m_start_position;
+    private Quaternion m_start_rotation;
 
     protected virtual void Start()
     {
@@ -49,6 +55,7 @@ public class SC_PhysicObject : MonoBehaviour
         start_mass = mass;
 
         m_start_position = transform.position;
+        m_start_rotation = transform.rotation;
     }
 
     protected virtual void Update()
@@ -77,13 +84,17 @@ public class SC_PhysicObject : MonoBehaviour
         if (_pos_current.y < -80)
         {
             _pos_current = m_start_position;
+            _rot_current = m_start_rotation;
             velocity = Vector3.zero;
             rotation = Vector3.zero;
+
+            RestartEvent();
         }
 
         bool start_on_ground = onGround;
 
         HandleWallCollision(ref velocity);
+        HandleCarCollision(ref velocity);
         RaycastHit hit = new RaycastHit();
         for (int i = 0; i < positions.Length; i++)
         {
@@ -114,6 +125,8 @@ public class SC_PhysicObject : MonoBehaviour
         // Assign the current position and rotation
         _pos_current += velocity;
         _rot_current *= Quaternion.Euler(0, rotation.y, 0);
+
+        current_velocity = velocity.magnitude * 3.6f; // conversion to kmh
     }
 
     private void Bounce(ref Vector3 vel)
@@ -145,7 +158,10 @@ public class SC_PhysicObject : MonoBehaviour
         if (Physics.BoxCast(_pos_current, half_extents, dir_horizontal, out RaycastHit hit, _rot_current, dist, layer_ground))
         {
             // Don't process if the collider is trigger
-            if (hit.collider.isTrigger) return;
+            if (hit.collider.isTrigger)
+            {
+                return;
+            }
 
             float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
             if (slopeAngle <= MAX_WALKABLE_ANGLE) return;
@@ -160,6 +176,30 @@ public class SC_PhysicObject : MonoBehaviour
             // small immediate correction toward the surface, but velocity carries the real bounce forward
 
             vel = reflected; // persistent velocity for next frame uses the real bounce, not the shrunk one
+        }
+    }
+
+    private void HandleCarCollision(ref Vector3 vel)
+    {
+        Vector3 center = _pos_current + Vector3.up * (transform.localScale.y * 0.5f);
+        Vector3 half_extents = transform.localScale * 0.5f;
+
+        Collider[] hits = Physics.OverlapBox(center, half_extents, _rot_current, layer_cars, QueryTriggerInteraction.Collide);
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.gameObject == gameObject) continue; // Skip self
+            if (!hit.CompareTag("PhysicObject")) continue; // Skip no physic objects
+
+            Vector3 dir_collision = (transform.position - hit.transform.position);
+            dir_collision.y = 0;
+
+            if (dir_collision.magnitude < 0.001f)
+                dir_collision = transform.right; // Fallback for if the cars are overlapping perfectly
+
+            dir_collision.Normalize();
+
+            vel += dir_collision * (bounciness / mass) * Time.fixedDeltaTime;
         }
     }
 
@@ -237,6 +277,8 @@ public class SC_PhysicObject : MonoBehaviour
     {
         velocity += force / mass;
     }
+
+    protected virtual void RestartEvent() { }
 
     private void OnDrawGizmos()
     {
