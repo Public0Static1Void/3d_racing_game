@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
+using Unity.Hierarchy;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 
 public class SC_PhysicObject : MonoBehaviour
 {
@@ -26,6 +28,11 @@ public class SC_PhysicObject : MonoBehaviour
     private Vector3 _pos_prev, _pos_current;
     private Quaternion _rot_prev, _rot_current;
 
+    public Vector3 Current_Position => _pos_current;
+    public Vector3 Forward => _rot_current * Vector3.forward;
+    public Vector3 Right => _rot_current * Vector3.right;
+    public Vector3 Up => _rot_current * Vector3.up;
+
     public float current_velocity = 0;
 
     [Header("Collisions")]
@@ -40,11 +47,26 @@ public class SC_PhysicObject : MonoBehaviour
     private float m_ground_timer = 0f;
     public const float MAX_WALKABLE_ANGLE = 75;
 
+    [Header("Wheels")]
+    [SerializeField] private List<Transform> m_wheels;
+    [SerializeField] private Transform m_car;
+    [SerializeField] private float m_wheel_offset = 0;
+    private float wheel_car_height_difference = 0;
+    private float[] m_wheels_rotation;
+
+    [SerializeField] private Vector3 model_forward_axis = Vector3.down;
+    [SerializeField] private Vector3 model_up_axis = Vector3.forward;
+
+    private Quaternion m_axis_correction;
+
+
     private static readonly Vector3[] positions = { Vector3.right + Vector3.forward, Vector3.left + Vector3.forward, Vector3.right + Vector3.back, Vector3.left + Vector3.back };
 
 
     protected Vector3 m_start_position;
     private Quaternion m_start_rotation;
+
+    public Vector3 aux_offset;
 
     protected virtual void Start()
     {
@@ -56,6 +78,32 @@ public class SC_PhysicObject : MonoBehaviour
 
         m_start_position = transform.position;
         m_start_rotation = transform.rotation;
+
+        // Wheels
+        m_wheels_rotation = new float[m_wheels.Count];
+        wheel_car_height_difference = m_car.position.y - m_wheels[0].position.y;
+
+        foreach (Transform t in m_wheels)
+        {
+            CreateParent(t);
+        }
+
+        CreateParent(m_car);
+
+        m_axis_correction = Quaternion.Inverse(Quaternion.LookRotation(model_forward_axis, model_up_axis));
+    }
+
+    private void CreateParent(Transform t)
+    {
+        // One-time setup per wheel, e.g. in Start()
+        GameObject pivotGO = new GameObject(t.name + "_Pivot");
+        pivotGO.transform.SetParent(transform, false);
+        pivotGO.transform.position = t.position;
+
+        Vector3 s = transform.lossyScale;
+        pivotGO.transform.localScale = new Vector3(1f / s.x, 1f / s.y, 1f / s.z); // cancels the parent's scale
+
+        t.SetParent(pivotGO.transform, true);
     }
 
     protected virtual void Update()
@@ -88,6 +136,8 @@ public class SC_PhysicObject : MonoBehaviour
             velocity = Vector3.zero;
             rotation = Vector3.zero;
 
+            transform.position = m_start_position;
+
             RestartEvent();
         }
 
@@ -96,13 +146,28 @@ public class SC_PhysicObject : MonoBehaviour
         HandleWallCollision(ref velocity);
         HandleCarCollision(ref velocity);
         RaycastHit hit = new RaycastHit();
+
+        int any_grounded = 0;
+        float highest_position = m_wheels[0].position.y;
         for (int i = 0; i < positions.Length; i++)
         {
             hit = HandleGroundDetection(positions[i]);
 
             HandlePenetration(hit, positions.Length);
             HandleGroundRotation(hit);
+
+            HandleWheelPosition(m_wheels[i], hit);
+            HandleWheelRotation(m_wheels[i], i);
+
+            if (m_wheels[i].position.y > highest_position)
+                highest_position = m_wheels[i].position.y;
+
+            if (onGround) any_grounded++;
         }
+
+        HandleCarRotation();
+
+        if (any_grounded > 0) onGround = true;
 
         // Check if it has to bounce
         if (start_on_ground != onGround && onGround && velocity.y < -0.25f && m_ground_timer > 0.5f)
@@ -173,9 +238,6 @@ public class SC_PhysicObject : MonoBehaviour
             float allowedDist = Mathf.Max(hit.distance - 0.05f, 0f);
             float scale = allowedDist / dist;
             vel = vel * scale + reflected * Time.fixedDeltaTime;
-            // small immediate correction toward the surface, but velocity carries the real bounce forward
-
-            vel = reflected; // persistent velocity for next frame uses the real bounce, not the shrunk one
         }
     }
 
@@ -184,6 +246,8 @@ public class SC_PhysicObject : MonoBehaviour
         Vector3 center = _pos_current + Vector3.up * (transform.localScale.y * 0.5f);
         Vector3 half_extents = transform.localScale * 0.5f;
 
+        float dist = velocity.magnitude;
+
         Collider[] hits = Physics.OverlapBox(center, half_extents, _rot_current, layer_cars, QueryTriggerInteraction.Collide);
 
         foreach (Collider hit in hits)
@@ -191,28 +255,29 @@ public class SC_PhysicObject : MonoBehaviour
             if (hit.gameObject == gameObject) continue; // Skip self
             if (!hit.CompareTag("PhysicObject")) continue; // Skip no physic objects
 
-            Vector3 dir_collision = (transform.position - hit.transform.position);
+            Vector3 dir_collision = (Current_Position - hit.transform.position);
             dir_collision.y = 0;
 
             if (dir_collision.magnitude < 0.001f)
-                dir_collision = transform.right; // Fallback for if the cars are overlapping perfectly
+                dir_collision = Right; // Fallback for if the cars are overlapping perfectly
 
-            dir_collision.Normalize();
+            float allowed_dist = Mathf.Max(dir_collision.magnitude - 0.05f, 0f); // How much distance is allowed the car to intersect this frame
+            float scale = allowed_dist / dist;
 
-            vel += dir_collision * (bounciness / mass) * Time.fixedDeltaTime;
+            vel = dir_collision * scale * Time.fixedDeltaTime / mass;
         }
     }
 
     private RaycastHit GetPositionHit(Vector3 offset)
     {
         Vector3 pos = _pos_current + _rot_current * offset;
-        Physics.Raycast(pos, -transform.up, out RaycastHit hit, transform.localScale.y * ground_detection_offset, layer_ground);
+        Physics.Raycast(pos, -Up, out RaycastHit hit, transform.localScale.y * ground_detection_offset, layer_ground);
         return hit;
     }
     private void HandleGroundRotation(RaycastHit hit)
     {
         if (!onGround) return;
-        Quaternion rot = Quaternion.FromToRotation(transform.up, hit.normal) * _rot_current;
+        Quaternion rot = Quaternion.FromToRotation(Up, hit.normal) * _rot_current;
 
         _rot_current = Quaternion.Slerp(_rot_current, rot, Time.fixedDeltaTime * terrain_rotate_speed);
     }
@@ -224,6 +289,55 @@ public class SC_PhysicObject : MonoBehaviour
         {
             _pos_current += Vector3.up * penetration / ray_num;
         }
+    }
+
+    // Wheels
+    private void HandleWheelPosition(Transform wheel, RaycastHit hit)
+    {
+        if (hit.collider == null) return;
+
+        Vector3 pos = wheel.position; // world space, current x/y/z
+        pos.y = hit.point.y - wheel_car_height_difference + m_wheel_offset; // hit.point is already world space too
+        wheel.position = Vector3.Lerp(wheel.position, pos, 100f * Time.fixedDeltaTime); // assign back in world space
+    }
+    private void HandleWheelRotation(Transform wheel, int index)
+    {
+        m_wheels_rotation[index] += velocity.magnitude * current_velocity * Time.fixedDeltaTime * 500; // vertical rotation
+
+        float steer_y = index > 1 ? rotation.y * 22.5f : 0;
+
+        m_wheels[index].localRotation = Quaternion.Euler(0, steer_y, 0) * Quaternion.Euler(m_wheels_rotation[index], 0, 0);
+    }
+    private void HandleCarRotation()
+    {
+        Vector3 frWheel = m_wheels[3].position;
+        Vector3 flWheel = m_wheels[2].position;
+        Vector3 rrWheel = m_wheels[1].position;
+        Vector3 rlWheel = m_wheels[0].position;
+
+        Vector3 frontMid = (frWheel + flWheel) * 0.5f;
+        Vector3 rearMid = (rrWheel + rlWheel) * 0.5f;
+        Vector3 rightMid = (frWheel + rrWheel) * 0.5f;
+        Vector3 leftMid = (flWheel + rlWheel) * 0.5f;
+
+        Vector3 forwardVec = frontMid - rearMid;
+        Vector3 rightVec = rightMid - leftMid;
+
+        Vector3 normal = Vector3.Cross(forwardVec, rightVec).normalized;
+        if (normal.y < 0) normal = -normal;
+
+        Vector3 projectedForward = Vector3.ProjectOnPlane(transform.forward, normal).normalized;
+        if (projectedForward.sqrMagnitude < 0.0001f) projectedForward = m_car.transform.forward;
+
+        // Standard frame that faces the desired direction...
+        Quaternion desiredStandardFrame = Quaternion.LookRotation(projectedForward, normal);
+
+        // ...then remapped so the MESH's actual forward/up axes land on that direction, not local Z/Y.
+        Quaternion targetWorldRotation = desiredStandardFrame * m_axis_correction;
+
+        Quaternion targetLocalRotation = Quaternion.Inverse(transform.rotation) * targetWorldRotation;
+
+        m_car.localRotation = Quaternion.Slerp(m_car.localRotation, targetLocalRotation, 100f * Time.fixedDeltaTime);
     }
 
     private void HandleGravity(ref Vector3 vel)
@@ -259,8 +373,8 @@ public class SC_PhysicObject : MonoBehaviour
 
         float vertical_vel = vel.y;
 
-        Vector3 forward = Vector3.Project(vel, transform.forward);
-        Vector3 side = Vector3.Project(vel, transform.right);
+        Vector3 forward = Vector3.Project(vel, Forward);
+        Vector3 side = Vector3.Project(vel, Right);
 
         steering_amount = Mathf.Clamp01(steering_amount);
         float grip = Mathf.Lerp(side_grip_straight, side_grip_turn, steering_amount);
@@ -283,6 +397,6 @@ public class SC_PhysicObject : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.gray;
-        Gizmos.DrawLine(transform.position, transform.position + Vector3.down * (transform.localScale.y * ground_detection_offset));
+        Gizmos.DrawLine(Current_Position, Current_Position + Vector3.down * (transform.localScale.y * ground_detection_offset));
     }
 }
