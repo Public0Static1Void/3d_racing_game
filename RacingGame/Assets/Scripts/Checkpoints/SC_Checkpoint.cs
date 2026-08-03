@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(BoxCollider))]
 public class SC_Checkpoint : MonoBehaviour
 {
     private SC_CheckpointManager sc_CheckpointManager;
@@ -15,9 +14,6 @@ public class SC_Checkpoint : MonoBehaviour
     private float m_timer = 0;
     private void Start()
     {
-        BoxCollider coll = GetComponent<BoxCollider>();
-        coll.isTrigger = true;
-
         sc_CheckpointManager = SC_CheckpointManager.instance;
 
         npcs = FindObjectsByType<SC_Car_npc>(FindObjectsSortMode.None);

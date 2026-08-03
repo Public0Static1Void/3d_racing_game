@@ -53,6 +53,7 @@ public class SC_PhysicObject : MonoBehaviour
     [SerializeField] private float m_wheel_offset = 0;
     private float wheel_car_height_difference = 0;
     private float[] m_wheels_rotation;
+    private Vector3[] m_wheel_local_offsets;
 
     [SerializeField] private Vector3 model_forward_axis = Vector3.down;
     [SerializeField] private Vector3 model_up_axis = Vector3.forward;
@@ -91,6 +92,14 @@ public class SC_PhysicObject : MonoBehaviour
         CreateParent(m_car);
 
         m_axis_correction = Quaternion.Inverse(Quaternion.LookRotation(model_forward_axis, model_up_axis));
+
+        m_wheel_local_offsets = new Vector3[m_wheels.Count];
+        for (int i = 0; i < m_wheels.Count; i++)
+        {
+            Vector3 localOffset = Quaternion.Inverse(transform.rotation) * (m_wheels[i].position - transform.position);
+            localOffset.y = 0; // only need horizontal offset — height comes from the raycast itself
+            m_wheel_local_offsets[i] = localOffset;
+        }
     }
 
     private void CreateParent(Transform t)
@@ -151,7 +160,9 @@ public class SC_PhysicObject : MonoBehaviour
         float highest_position = m_wheels[0].position.y;
         for (int i = 0; i < positions.Length; i++)
         {
-            hit = HandleGroundDetection(positions[i]);
+            Vector3 pos = m_wheel_local_offsets[i];
+
+            hit = HandleGroundDetection(pos);
 
             HandlePenetration(hit, positions.Length);
             HandleGroundRotation(hit);
@@ -255,16 +266,44 @@ public class SC_PhysicObject : MonoBehaviour
             if (hit.gameObject == gameObject) continue; // Skip self
             if (!hit.CompareTag("PhysicObject")) continue; // Skip no physic objects
 
-            Vector3 dir_collision = (Current_Position - hit.transform.position);
-            dir_collision.y = 0;
+            SC_PhysicObject otherObject = hit.GetComponent<SC_PhysicObject>();
+            if (otherObject == null) continue;
 
-            if (dir_collision.magnitude < 0.001f)
-                dir_collision = Right; // Fallback for if the cars are overlapping perfectly
+            bool overlap = Physics.ComputePenetration(
+                GetComponent<Collider>(), center, _rot_current,
+                hit, hit.transform.position, hit.transform.rotation,
+                out Vector3 push_dir, out float push_dist
+            );
 
-            float allowed_dist = Mathf.Max(dir_collision.magnitude - 0.05f, 0f); // How much distance is allowed the car to intersect this frame
-            float scale = allowed_dist / dist;
+            if (!overlap || push_dist <= 0.01) continue;
 
-            vel = dir_collision * scale * Time.fixedDeltaTime / mass;
+            push_dir.y = 0; // Only push horizontally
+            if (push_dir.magnitude < 0.001f) push_dir = Right;
+
+            push_dir.Normalize();
+
+            // Position correction to avoid overlapping
+            float total_mass = mass + otherObject.mass;
+            float my_share = otherObject.mass / total_mass;
+
+            _pos_current += push_dir * push_dist * my_share;
+
+            float collision_speed = Vector3.Dot(vel - otherObject.velocity, -push_dir);
+            if (collision_speed > 0)
+            {
+                float impulse = collision_speed * (1 + bounciness) * (otherObject.mass / total_mass);
+                if (impulse > 20) impulse = 20;
+                vel += push_dir * impulse;
+
+                // Adds a rotation
+                Vector3 contact_point = center - push_dir * (half_extents.magnitude * 0.5f);
+                Vector3 lever_arm = contact_point - _pos_current;
+                lever_arm.y = 0;
+                float torque_dir = Mathf.Sign(Vector3.Cross(lever_arm, push_dir).y);
+                float spin_impulse = torque_dir * impulse * lever_arm.magnitude * 0.5f * (otherObject.mass / total_mass);
+
+                rotation.y += spin_impulse;
+            }
         }
     }
 
@@ -298,7 +337,8 @@ public class SC_PhysicObject : MonoBehaviour
 
         Vector3 pos = wheel.position; // world space, current x/y/z
         pos.y = hit.point.y - wheel_car_height_difference + m_wheel_offset; // hit.point is already world space too
-        wheel.position = Vector3.Lerp(wheel.position, pos, 100f * Time.fixedDeltaTime); // assign back in world space
+        //wheel.position = Vector3.Lerp(wheel.position, pos, 100f * Time.fixedDeltaTime); // assign back in world space
+        wheel.position = pos; // assign back in world space
     }
     private void HandleWheelRotation(Transform wheel, int index)
     {
@@ -326,8 +366,8 @@ public class SC_PhysicObject : MonoBehaviour
         Vector3 normal = Vector3.Cross(forwardVec, rightVec).normalized;
         if (normal.y < 0) normal = -normal;
 
-        Vector3 projectedForward = Vector3.ProjectOnPlane(transform.forward, normal).normalized;
-        if (projectedForward.sqrMagnitude < 0.0001f) projectedForward = m_car.transform.forward;
+        Vector3 projectedForward = Vector3.ProjectOnPlane(Forward, normal).normalized;
+        if (projectedForward.sqrMagnitude < 0.0001f) projectedForward = Forward;
 
         // Standard frame that faces the desired direction...
         Quaternion desiredStandardFrame = Quaternion.LookRotation(projectedForward, normal);
@@ -335,9 +375,13 @@ public class SC_PhysicObject : MonoBehaviour
         // ...then remapped so the MESH's actual forward/up axes land on that direction, not local Z/Y.
         Quaternion targetWorldRotation = desiredStandardFrame * m_axis_correction;
 
-        Quaternion targetLocalRotation = Quaternion.Inverse(transform.rotation) * targetWorldRotation;
+        Quaternion targetLocalRotation = Quaternion.Inverse(_rot_current) * targetWorldRotation;
 
-        m_car.localRotation = Quaternion.Slerp(m_car.localRotation, targetLocalRotation, 100f * Time.fixedDeltaTime);
+        //m_car.localRotation = Quaternion.Slerp(m_car.localRotation, targetLocalRotation, 100f * Time.fixedDeltaTime);
+        m_car.localRotation = targetLocalRotation;
+
+        Debug.DrawLine(_pos_current, _pos_current + normal * 5f, Color.cyan);
+        Debug.Log($"pitch delta (front-rear Y): {frontMid.y - rearMid.y}");
     }
 
     private void HandleGravity(ref Vector3 vel)

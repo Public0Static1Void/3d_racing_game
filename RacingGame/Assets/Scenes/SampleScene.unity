@@ -130,7 +130,6 @@ GameObject:
   - component: {fileID: 101665}
   - component: {fileID: 101664}
   - component: {fileID: 101663}
-  - component: {fileID: 101662}
   - component: {fileID: 101666}
   m_Layer: 0
   m_Name: Checkpoint (2)
@@ -139,27 +138,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!65 &101662
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 101661}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &101663
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -384,7 +362,6 @@ GameObject:
   - component: {fileID: 203346978}
   - component: {fileID: 203346977}
   - component: {fileID: 203346976}
-  - component: {fileID: 203346975}
   - component: {fileID: 203346979}
   m_Layer: 0
   m_Name: Checkpoint
@@ -393,27 +370,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!65 &203346975
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 203346974}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &203346976
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -945,15 +901,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5c6b8ede9eeff408f8892ad14cc7e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 10
-  mass: 1
+  speed: 5
+  mass: 10
   start_mass: 0
   acceleration: 2
-  rotation_speed: 10
+  rotation_speed: 5
   terrain_rotate_speed: 10
   gravity_multipler: 0.05
   bounciness: 0.5
-  side_grip_straight: 0.5
+  side_grip_straight: 0.3
   side_grip_turn: 1
   velocity: {x: 0, y: 0, z: 0}
   max_velocity: {x: 5, y: 3, z: 5}
@@ -966,8 +922,8 @@ MonoBehaviour:
   layer_ground:
     serializedVersion: 2
     m_Bits: 51
-  ground_friction: 0.92
-  ground_detection_offset: 0.5
+  ground_friction: 0.99
+  ground_detection_offset: 0.65
   onGround: 1
   m_wheels:
   - {fileID: 302859592}
@@ -975,7 +931,7 @@ MonoBehaviour:
   - {fileID: 1268896378}
   - {fileID: 536955946}
   m_car: {fileID: 351290077}
-  m_wheel_offset: -0.1
+  m_wheel_offset: 0
   model_forward_axis: {x: 0, y: 0, z: 1}
   model_up_axis: {x: 0, y: 1, z: 0}
   aux_offset: {x: 0, y: 0, z: 0}
@@ -1068,7 +1024,7 @@ Transform:
   m_GameObject: {fileID: 384892769}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -87.83, y: 3.4300003, z: -18.54}
+  m_LocalPosition: {x: -87.83, y: 3.1800003, z: -18.54}
   m_LocalScale: {x: 2, y: 1, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1343,15 +1299,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5c6b8ede9eeff408f8892ad14cc7e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 10
-  mass: 1
+  speed: 5
+  mass: 10
   start_mass: 0
   acceleration: 2
-  rotation_speed: 10
+  rotation_speed: 5
   terrain_rotate_speed: 10
   gravity_multipler: 0.05
   bounciness: 0.5
-  side_grip_straight: 0.5
+  side_grip_straight: 0.3
   side_grip_turn: 1
   velocity: {x: 0, y: 0, z: 0}
   max_velocity: {x: 5, y: 3, z: 5}
@@ -1364,8 +1320,8 @@ MonoBehaviour:
   layer_ground:
     serializedVersion: 2
     m_Bits: 51
-  ground_friction: 0.92
-  ground_detection_offset: 0.5
+  ground_friction: 0.99
+  ground_detection_offset: 0.65
   onGround: 1
   m_wheels:
   - {fileID: 1122082111}
@@ -1373,7 +1329,7 @@ MonoBehaviour:
   - {fileID: 353128014}
   - {fileID: 465684407}
   m_car: {fileID: 890609049}
-  m_wheel_offset: -0.1
+  m_wheel_offset: 0
   model_forward_axis: {x: 0, y: 0, z: 1}
   model_up_axis: {x: 0, y: 1, z: 0}
   aux_offset: {x: 0, y: 0, z: 0}
@@ -1466,7 +1422,7 @@ Transform:
   m_GameObject: {fileID: 763038831}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.000000029802319, z: -0, w: 1}
-  m_LocalPosition: {x: -108.8, y: 3.4300003, z: -34.4}
+  m_LocalPosition: {x: -108.8, y: 3.1800003, z: -34.4}
   m_LocalScale: {x: 2, y: 1, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1895,7 +1851,7 @@ Transform:
   m_GameObject: {fileID: 1055654010}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.09060013, z: -0, w: 0.99588734}
-  m_LocalPosition: {x: -91.36, y: 3.4300003, z: -18.23}
+  m_LocalPosition: {x: -91.36, y: 3.1800003, z: -18.23}
   m_LocalScale: {x: 2, y: 1, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1914,15 +1870,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5c6b8ede9eeff408f8892ad14cc7e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 10
-  mass: 1
+  speed: 5
+  mass: 10
   start_mass: 0
   acceleration: 2
-  rotation_speed: 10
+  rotation_speed: 5
   terrain_rotate_speed: 10
   gravity_multipler: 0.05
   bounciness: 0.5
-  side_grip_straight: 0.5
+  side_grip_straight: 0.3
   side_grip_turn: 1
   velocity: {x: 0, y: 0, z: 0}
   max_velocity: {x: 5, y: 3, z: 5}
@@ -1935,8 +1891,8 @@ MonoBehaviour:
   layer_ground:
     serializedVersion: 2
     m_Bits: 51
-  ground_friction: 0.92
-  ground_detection_offset: 0.5
+  ground_friction: 0.99
+  ground_detection_offset: 0.65
   onGround: 1
   m_wheels:
   - {fileID: 1008547992}
@@ -1944,7 +1900,7 @@ MonoBehaviour:
   - {fileID: 1167968503}
   - {fileID: 2108689473}
   m_car: {fileID: 384767488}
-  m_wheel_offset: -0.1
+  m_wheel_offset: 0
   model_forward_axis: {x: 0, y: 0, z: 1}
   model_up_axis: {x: 0, y: 1, z: 0}
   aux_offset: {x: 0, y: 0, z: 0}
@@ -2213,7 +2169,7 @@ Transform:
   m_GameObject: {fileID: 1291207686}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -112.8, y: 0.9, z: -24.000008}
+  m_LocalPosition: {x: -112.8, y: 0.65, z: -24.000008}
   m_LocalScale: {x: 2, y: 1, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2407,7 +2363,6 @@ GameObject:
   - component: {fileID: 1324347474}
   - component: {fileID: 1324347473}
   - component: {fileID: 1324347472}
-  - component: {fileID: 1324347471}
   - component: {fileID: 1324347475}
   m_Layer: 0
   m_Name: Checkpoint (1)
@@ -2416,27 +2371,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!65 &1324347471
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1324347470}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &1324347472
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2803,10 +2737,10 @@ MonoBehaviour:
         z: 41.367065
       Rotation:
         value:
-          x: -3.616569e-24
-          y: 0.9619402
-          z: 1.2731171e-23
-          w: 0.27326018
+          x: -0.021206543
+          y: 0.96170646
+          z: 0.006024162
+          w: 0.27319336
     - Position:
         x: 266
         y: -20
@@ -2942,7 +2876,7 @@ MonoBehaviour:
   m_LayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_UseGeometry: 0
+  m_UseGeometry: 1
   m_DefaultArea: 0
   m_GenerateLinks: 0
   m_IgnoreNavMeshAgent: 1
