@@ -37,6 +37,7 @@ public class SC_PhysicObject : MonoBehaviour
 
     [Header("Collisions")]
     public LayerMask layer_cars;
+    public float collision_rotation_multiplier = 50;
 
     [Header("Ground")]
     public LayerMask layer_ground;
@@ -57,6 +58,8 @@ public class SC_PhysicObject : MonoBehaviour
 
     [SerializeField] private Vector3 model_forward_axis = Vector3.down;
     [SerializeField] private Vector3 model_up_axis = Vector3.forward;
+    [SerializeField] private Vector3 euler_correction;
+    [SerializeField] private Vector3 euler_wheel_correction;
 
     private Quaternion m_axis_correction;
 
@@ -91,7 +94,8 @@ public class SC_PhysicObject : MonoBehaviour
 
         CreateParent(m_car);
 
-        m_axis_correction = Quaternion.Inverse(Quaternion.LookRotation(model_forward_axis, model_up_axis));
+        m_axis_correction = Quaternion.Inverse(Quaternion.LookRotation(model_forward_axis, model_up_axis))
+                        * Quaternion.Euler(euler_correction);
 
         m_wheel_local_offsets = new Vector3[m_wheels.Count];
         for (int i = 0; i < m_wheels.Count; i++)
@@ -102,7 +106,7 @@ public class SC_PhysicObject : MonoBehaviour
         }
     }
 
-    private void CreateParent(Transform t)
+    private Transform CreateParent(Transform t)
     {
         // One-time setup per wheel, e.g. in Start()
         GameObject pivotGO = new GameObject(t.name + "_Pivot");
@@ -113,6 +117,8 @@ public class SC_PhysicObject : MonoBehaviour
         pivotGO.transform.localScale = new Vector3(1f / s.x, 1f / s.y, 1f / s.z); // cancels the parent's scale
 
         t.SetParent(pivotGO.transform, true);
+
+        return pivotGO.transform;
     }
 
     protected virtual void Update()
@@ -222,7 +228,7 @@ public class SC_PhysicObject : MonoBehaviour
     private void HandleWallCollision(ref Vector3 vel)
     {
         float dist = vel.magnitude;
-        if (dist < 0.0001f) return; // only skip for genuinely zero movement
+        if (dist < 0.0001f) return;
 
         Vector3 dir = vel.normalized;
         Vector3 dir_horizontal = new Vector3(dir.x, 0, dir.z);
@@ -233,22 +239,28 @@ public class SC_PhysicObject : MonoBehaviour
 
         if (Physics.BoxCast(_pos_current, half_extents, dir_horizontal, out RaycastHit hit, _rot_current, dist, layer_ground))
         {
-            // Don't process if the collider is trigger
-            if (hit.collider.isTrigger)
-            {
-                return;
-            }
+            if (hit.collider.isTrigger) return;
 
             float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
             if (slopeAngle <= MAX_WALKABLE_ANGLE) return;
 
-            // Reflect the ORIGINAL incoming velocity — this is the real bounce impulse
+            // Reflect the incoming velocity off the wall normal — this IS the new velocity, no dt needed
             Vector3 reflected = Vector3.Reflect(vel, hit.normal) * bounciness;
 
-            // Clamp how far we're allowed to move THIS frame to the wall surface
-            float allowedDist = Mathf.Max(hit.distance - 0.05f, 0f);
-            float scale = allowedDist / dist;
-            vel = vel * scale + reflected * Time.fixedDeltaTime;
+            float penetration = Mathf.Max(dist - hit.distance, 0f);
+            if (penetration > 0f)
+            {
+                _pos_current += hit.normal * penetration * 0.5f; // push back out along the wall normal
+            }
+
+            vel = reflected;
+
+            Vector3 reflected_horizontal = new Vector3(reflected.x, 0, reflected.z);
+            if (reflected_horizontal.sqrMagnitude > 0.0001f)
+            {
+                float turn_angle = Vector3.SignedAngle(dir_horizontal, reflected_horizontal.normalized, Vector3.up);
+                rotation.y = turn_angle * bounciness;
+            }
         }
     }
 
@@ -302,7 +314,7 @@ public class SC_PhysicObject : MonoBehaviour
                 float torque_dir = Mathf.Sign(Vector3.Cross(lever_arm, push_dir).y);
                 float spin_impulse = torque_dir * impulse * lever_arm.magnitude * 0.5f * (otherObject.mass / total_mass);
 
-                rotation.y += spin_impulse;
+                rotation.y += spin_impulse * collision_rotation_multiplier;
             }
         }
     }
@@ -337,8 +349,8 @@ public class SC_PhysicObject : MonoBehaviour
 
         Vector3 pos = wheel.position; // world space, current x/y/z
         pos.y = hit.point.y - wheel_car_height_difference + m_wheel_offset; // hit.point is already world space too
-        //wheel.position = Vector3.Lerp(wheel.position, pos, 100f * Time.fixedDeltaTime); // assign back in world space
-        wheel.position = pos; // assign back in world space
+        wheel.position = Vector3.Lerp(wheel.position, pos, 10 * Time.fixedDeltaTime); // assign back in world space
+        //wheel.position = pos; // assign back in world space
     }
     private void HandleWheelRotation(Transform wheel, int index)
     {
@@ -347,6 +359,8 @@ public class SC_PhysicObject : MonoBehaviour
         float steer_y = index > 1 ? rotation.y * 22.5f : 0;
 
         m_wheels[index].localRotation = Quaternion.Euler(0, steer_y, 0) * Quaternion.Euler(m_wheels_rotation[index], 0, 0);
+        if (euler_wheel_correction != Vector3.zero)
+            m_wheels[index].localRotation *= Quaternion.Euler(euler_wheel_correction);
     }
     private void HandleCarRotation()
     {
@@ -377,11 +391,11 @@ public class SC_PhysicObject : MonoBehaviour
 
         Quaternion targetLocalRotation = Quaternion.Inverse(_rot_current) * targetWorldRotation;
 
-        //m_car.localRotation = Quaternion.Slerp(m_car.localRotation, targetLocalRotation, 100f * Time.fixedDeltaTime);
-        m_car.localRotation = targetLocalRotation;
+        m_car.localRotation = Quaternion.Slerp(m_car.localRotation, targetLocalRotation, 10 * Time.fixedDeltaTime);
+        //m_car.localRotation = targetLocalRotation;
 
         Debug.DrawLine(_pos_current, _pos_current + normal * 5f, Color.cyan);
-        Debug.Log($"pitch delta (front-rear Y): {frontMid.y - rearMid.y}");
+        //Debug.Log($"pitch delta (front-rear Y): {frontMid.y - rearMid.y}");
     }
 
     private void HandleGravity(ref Vector3 vel)

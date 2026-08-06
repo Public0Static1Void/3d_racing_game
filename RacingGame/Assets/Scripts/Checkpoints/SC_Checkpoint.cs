@@ -37,11 +37,17 @@ public class SC_Checkpoint : MonoBehaviour
         foreach (SC_Car_npc npc in npcs)
         {
             dist = Vector3.Distance(transform.position, npc.transform.position);
-            if (dist < 10)
+            if (dist < transform.localScale.x)
             {
                 npc.SetDestination(sc_CheckpointManager.GetNextCheckpointPosition(check_point_num + 1));
                 opened = true;
             }
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.gray;
+        Gizmos.DrawWireSphere(transform.position, transform.localScale.x);
     }
 }

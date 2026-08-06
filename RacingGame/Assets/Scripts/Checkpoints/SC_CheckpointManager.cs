@@ -5,7 +5,8 @@ public class SC_CheckpointManager : MonoBehaviour
 {
     public static SC_CheckpointManager instance {  get; private set; }
 
-    [SerializeField] private List<SC_Checkpoint> checkpoints;
+    public Transform checkpoints_parent;
+    private SC_Checkpoint[] checkpoints;
 
     private void Awake()
     {
@@ -14,7 +15,14 @@ public class SC_CheckpointManager : MonoBehaviour
         else
             Destroy(this.gameObject);
 
-        if (checkpoints.Count <= 1)
+        checkpoints = checkpoints_parent.GetComponentsInChildren<SC_Checkpoint>();
+
+        for (int i = 0; i < checkpoints.Length; i++)
+        {
+            checkpoints[i].check_point_num = i;
+        }
+
+        if (checkpoints.Length <= 1)
         {
             Debug.LogWarning("No checkpoints or only one stored");
         }
@@ -22,13 +30,13 @@ public class SC_CheckpointManager : MonoBehaviour
 
     public Vector3 GetNextCheckpointPosition(int index)
     {
-        return checkpoints[index % checkpoints.Count].transform.position + Vector3.right * Random.Range(-5f, 5f);
+        return checkpoints[index % checkpoints.Length].transform.position + Vector3.right * Random.Range(-5f, 5f);
     }
     public (Vector3, int) GetNearestCheckpoint(Vector3 position)
     {
         float dist = 10000;
         int index = 0;
-        for (int i = 1; i < checkpoints.Count; i++)
+        for (int i = 1; i < checkpoints.Length; i++)
         {
             float new_dist = Vector3.Distance(position, checkpoints[i].transform.position);
             if (new_dist < dist && dist > 10)
@@ -38,7 +46,7 @@ public class SC_CheckpointManager : MonoBehaviour
             }
         }
 
-        if (index >= checkpoints.Count || index < 0) return (position, -1);
+        if (index >= checkpoints.Length || index < 0) return (position, -1);
         return (checkpoints[index].transform.position, index);
     }
 }

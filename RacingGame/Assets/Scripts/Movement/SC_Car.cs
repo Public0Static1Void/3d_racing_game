@@ -5,10 +5,20 @@ public class SC_Car : SC_PhysicObject
 {
     private Vector2 m_input;
 
+    private float m_current_acceleration = 0;
+
     protected override void FixedUpdate()
     {
         base.FixedUpdate();
         HandleInputSpeed(ref velocity, ref rotation);
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+
+        if (m_input == Vector2.zero && m_current_acceleration > 0)
+            m_current_acceleration -= Time.deltaTime * acceleration;
     }
 
     #region PhysicFunctions
@@ -19,7 +29,9 @@ public class SC_Car : SC_PhysicObject
     {
         if (onGround)
         {
-            vel += transform.forward * m_input.y * acceleration * Time.fixedDeltaTime;
+            vel += transform.forward * m_input.y * m_current_acceleration * Time.fixedDeltaTime;
+            m_current_acceleration += acceleration * Time.deltaTime;
+            if (m_current_acceleration > speed) m_current_acceleration = speed;
         }
         /// A dot tells you how much a vector is pointing in the direction of another
         float speedForward = Vector3.Dot(vel, transform.forward);
@@ -40,7 +52,7 @@ public class SC_Car : SC_PhysicObject
 
     public void Boost(float amount)
     {
-        AddForce(transform.forward * amount);
+        AddForce(Forward * amount);
     }
     #endregion
 
