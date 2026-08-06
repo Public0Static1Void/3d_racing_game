@@ -72,6 +72,10 @@ public class SC_PhysicObject : MonoBehaviour
 
     public Vector3 aux_offset;
 
+    // State variables
+    public bool drifting = false;
+
+
     protected virtual void Start()
     {
         // Store the current position and rotation
@@ -428,6 +432,11 @@ public class SC_PhysicObject : MonoBehaviour
     private void ApplyDrift(ref Vector3 vel, float steering_amount)
     {
         if (!onGround) return;
+
+        if (steering_amount > 0.65f)
+            drifting = true;
+        else
+            drifting = false;
 
         float vertical_vel = vel.y;
 
