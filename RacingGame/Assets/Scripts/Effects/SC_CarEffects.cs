@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(SC_PhysicObject))]
 public class SC_CarEffects : MonoBehaviour
@@ -8,15 +9,13 @@ public class SC_CarEffects : MonoBehaviour
     public AudioSource as_DriftSource;
     private float m_drift_volume = 0;
 
-    public ParticleSystem ps_DriftParticles;
-    public ParticleSystem ps_DriftParticles2;
-    private ParticleSystem.EmissionModule emission;
+    public List<ParticleSystem> ps_DriftParticles;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         m_physics = GetComponent<SC_PhysicObject>();
 
-        emission = ps_DriftParticles.emission;
     }
 
     // Update is called once per frame
@@ -35,14 +34,14 @@ public class SC_CarEffects : MonoBehaviour
                 if (as_DriftSource.isPlaying)
                     as_DriftSource.Pause();
             }
-            if (ps_DriftParticles.isPlaying) ps_DriftParticles.Pause();
-            if (ps_DriftParticles2.isPlaying) ps_DriftParticles2.Pause();
+            foreach (ParticleSystem ps in ps_DriftParticles)
+                if (ps.isPlaying) ps.Stop();
 
             return;
         }
 
-        if (!ps_DriftParticles.isPlaying) ps_DriftParticles.Play();
-        if (!ps_DriftParticles2.isPlaying) ps_DriftParticles2.Play();
+        foreach (ParticleSystem ps in ps_DriftParticles)
+            if (!ps.isPlaying) ps.Play();
 
         if (!as_DriftSource.isPlaying) as_DriftSource.UnPause();
 

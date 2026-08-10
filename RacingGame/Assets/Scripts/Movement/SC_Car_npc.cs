@@ -6,8 +6,6 @@ public class SC_Car_npc : SC_PhysicObject
 {
     private NavMeshAgent m_agent;
 
-    private float m_accelerating_speed = 0;
-
     [Header("AI")]
     public Transform target;
 
@@ -126,7 +124,7 @@ public class SC_Car_npc : SC_PhysicObject
         m_state = DriveState.Reversing;
         m_reverse_timer = 0f;
         m_low_progress_timer = 0f;
-        m_accelerating_speed = 0f;
+        m_current_acceleration = 0f;
 
         // Steer away from whatever turn we were attempting, to help un-wedge from a corner
         m_reverse_turn = Mathf.Sign(m_cached_turn);
@@ -134,6 +132,8 @@ public class SC_Car_npc : SC_PhysicObject
 
     private void HandleReversing()
     {
+        if (speed == 0) return;
+
         m_reverse_timer += Time.fixedDeltaTime;
 
         velocity += -Forward * reverse_speed * Time.fixedDeltaTime;
@@ -148,7 +148,14 @@ public class SC_Car_npc : SC_PhysicObject
 
     private void HandleNavigation()
     {
-        if (m_agent.pathPending || !onGround) return; // Exits if there itsn't a path or the car isn't on the ground
+        if (m_agent.pathPending || !onGround)
+        {
+            if (m_current_acceleration > 0)
+            {
+                m_current_acceleration = Mathf.MoveTowards(m_current_acceleration, 0, acceleration * Time.fixedDeltaTime);
+            }
+            return; // Exits if there itsn't a path or the car isn't on the ground
+        }
 
         Vector3 desiredDir = GetLookAheadDir();
         desiredDir.y = 0;
@@ -180,12 +187,12 @@ public class SC_Car_npc : SC_PhysicObject
         float move_towards_speed = 0;
         if (m_agent.remainingDistance > m_agent.stoppingDistance)
         {
-            velocity += Forward * m_accelerating_speed * Time.fixedDeltaTime;
+            velocity += Forward * m_current_acceleration * Time.fixedDeltaTime;
 
             move_towards_speed = speed * speed_factor;
         }
 
-        m_accelerating_speed = Mathf.MoveTowards(m_accelerating_speed, move_towards_speed, acceleration * Time.fixedDeltaTime);
+        m_current_acceleration = Mathf.MoveTowards(m_current_acceleration, move_towards_speed, acceleration * Time.fixedDeltaTime);
     }
 
     private Vector3 GetLookAheadPoint(float lookAheadDistance)
@@ -259,7 +266,7 @@ public class SC_Car_npc : SC_PhysicObject
         else
             m_agent.Warp(m_start_position);
 
-        m_accelerating_speed = 0;
+        m_current_acceleration = 0;
         m_state = DriveState.Driving;
         m_low_progress_timer = 0f;
         m_stuck_check_pos = Current_Position;

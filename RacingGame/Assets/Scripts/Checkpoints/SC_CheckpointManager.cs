@@ -6,7 +6,7 @@ public class SC_CheckpointManager : MonoBehaviour
     public static SC_CheckpointManager instance {  get; private set; }
 
     public Transform checkpoints_parent;
-    private SC_Checkpoint[] checkpoints;
+    [HideInInspector] public SC_Checkpoint[] checkpoints;
 
     private void Awake()
     {
@@ -48,5 +48,15 @@ public class SC_CheckpointManager : MonoBehaviour
 
         if (index >= checkpoints.Length || index < 0) return (position, -1);
         return (checkpoints[index].transform.position, index);
+    }
+
+    /// <summary>
+    /// Returns the length between two segments
+    /// </summary>
+    public float GetSegmenthLength(int index)
+    {
+        Transform a = checkpoints[index].transform;
+        Transform b = checkpoints[(index+ 1) % checkpoints.Length].transform;
+        return Vector3.Distance(a.position, b.position);
     }
 }

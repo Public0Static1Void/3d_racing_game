@@ -25,6 +25,8 @@ public class SC_PhysicObject : MonoBehaviour
     public Vector3 rotation;
     public Vector3 max_rotation;
 
+    protected float m_current_acceleration = 0;
+
     private Vector3 _pos_prev, _pos_current;
     private Quaternion _rot_prev, _rot_current;
 
@@ -80,6 +82,7 @@ public class SC_PhysicObject : MonoBehaviour
     {
         // Store the current position and rotation
         _pos_current = transform.position;
+        _pos_prev = transform.position - transform.forward;
         _rot_current = transform.rotation;
 
         start_mass = mass;
@@ -258,6 +261,7 @@ public class SC_PhysicObject : MonoBehaviour
             }
 
             vel = reflected;
+            m_current_acceleration = vel.magnitude;
 
             Vector3 reflected_horizontal = new Vector3(reflected.x, 0, reflected.z);
             if (reflected_horizontal.sqrMagnitude > 0.0001f)
@@ -270,23 +274,31 @@ public class SC_PhysicObject : MonoBehaviour
 
     private void HandleCarCollision(ref Vector3 vel)
     {
-        Vector3 center = _pos_current + Vector3.up * (transform.localScale.y * 0.5f);
         Vector3 half_extents = transform.localScale * 0.5f;
+        float dist = vel.magnitude * Time.fixedDeltaTime; // actual distance traveled this step
+        Vector3 dir = dist > 0.0001f ? vel.normalized : Forward;
 
-        float dist = velocity.magnitude;
+        Vector3 castOrigin = _pos_current + Vector3.up * (transform.localScale.y * 0.5f);
 
-        Collider[] hits = Physics.OverlapBox(center, half_extents, _rot_current, layer_cars, QueryTriggerInteraction.Collide);
+        RaycastHit[] sweepHits = Physics.BoxCastAll(
+            castOrigin, half_extents, dir, _rot_current, dist,
+            layer_cars, QueryTriggerInteraction.Collide
+        );
 
-        foreach (Collider hit in hits)
+        foreach (RaycastHit sweepHit in sweepHits)
         {
-            if (hit.gameObject == gameObject) continue; // Skip self
-            if (!hit.CompareTag("PhysicObject")) continue; // Skip no physic objects
-
+            Collider hit = sweepHit.collider;
+            if (hit.gameObject == gameObject) continue;
+            if (!hit.CompareTag("PhysicObject")) continue;
             SC_PhysicObject otherObject = hit.GetComponent<SC_PhysicObject>();
             if (otherObject == null) continue;
 
+            // Move to the point of impact along the sweep before resolving penetration,
+            // so ComputePenetration is evaluated where the collision actually happens.
+            Vector3 centerAtImpact = castOrigin + dir * sweepHit.distance;
+
             bool overlap = Physics.ComputePenetration(
-                GetComponent<Collider>(), center, _rot_current,
+                GetComponent<Collider>(), centerAtImpact, _rot_current,
                 hit, hit.transform.position, hit.transform.rotation,
                 out Vector3 push_dir, out float push_dist
             );
@@ -308,17 +320,21 @@ public class SC_PhysicObject : MonoBehaviour
             if (collision_speed > 0)
             {
                 float impulse = collision_speed * (1 + bounciness) * (otherObject.mass / total_mass);
-                if (impulse > 20) impulse = 20;
+                if (impulse > 5) impulse = 5;
                 vel += push_dir * impulse;
 
                 // Adds a rotation
-                Vector3 contact_point = center - push_dir * (half_extents.magnitude * 0.5f);
+                Vector3 contact_point = centerAtImpact - push_dir * (half_extents.magnitude * 0.5f);
                 Vector3 lever_arm = contact_point - _pos_current;
                 lever_arm.y = 0;
                 float torque_dir = Mathf.Sign(Vector3.Cross(lever_arm, push_dir).y);
                 float spin_impulse = torque_dir * impulse * lever_arm.magnitude * 0.5f * (otherObject.mass / total_mass);
 
+                Debug.Log($"Torque applied: {spin_impulse * collision_rotation_multiplier}");
+
                 rotation.y += spin_impulse * collision_rotation_multiplier;
+
+                m_current_acceleration = vel.magnitude * 2; /// Penalizes less the car collisions
             }
         }
     }
@@ -396,6 +412,19 @@ public class SC_PhysicObject : MonoBehaviour
         Quaternion targetLocalRotation = Quaternion.Inverse(_rot_current) * targetWorldRotation;
 
         m_car.localRotation = Quaternion.Slerp(m_car.localRotation, targetLocalRotation, 10 * Time.fixedDeltaTime);
+
+        float highest = m_wheels[0].position.y;
+        int index = 0;
+        for (int i = 1; i < m_wheels.Count; i++)
+        {
+            if (m_wheels[i].position.y > highest)
+            {
+                highest = m_wheels[i].position.y;
+                index = i;
+            }
+        }
+
+        m_car.position = new Vector3(m_car.position.x, highest + wheel_car_height_difference, m_car.position.z);
         //m_car.localRotation = targetLocalRotation;
 
         Debug.DrawLine(_pos_current, _pos_current + normal * 5f, Color.cyan);

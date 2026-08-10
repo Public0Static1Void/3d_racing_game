@@ -6,8 +6,13 @@ public class SC_Checkpoint : MonoBehaviour
     private SC_CheckpointManager sc_CheckpointManager;
 
     private SC_Car_npc[] npcs;
+    private SC_RaceProgress[] m_cars;
     public bool opened = false;
     public float dist = 11;
+
+    private bool[] cars_opened;
+    private float[] cars_dist;
+    private float[] cars_timer;
 
     public int check_point_num = -1;
 
@@ -17,30 +22,42 @@ public class SC_Checkpoint : MonoBehaviour
         sc_CheckpointManager = SC_CheckpointManager.instance;
 
         npcs = FindObjectsByType<SC_Car_npc>(FindObjectsSortMode.None);
+        m_cars = FindObjectsByType<SC_RaceProgress>(FindObjectsSortMode.None);
+        cars_dist = new float[m_cars.Length];
+        cars_timer = new float[m_cars.Length];
+        cars_opened = new bool[m_cars.Length];
 
         if (check_point_num < 0)
             Debug.LogWarning("The checkpoint number must be assigned");
     }
     private void Update()
     {
-        if (opened)
+        for (int i = 0; i < m_cars.Length; i++)
         {
-            m_timer += Time.deltaTime;
-            if (m_timer > 0.1f)
+            if (!cars_opened[i])
             {
-                opened = false;
-                m_timer = 0;
-            }
-            return;
-        }
+                cars_dist[i] = Vector3.Distance(transform.position, m_cars[i].transform.position);
 
-        foreach (SC_Car_npc npc in npcs)
-        {
-            dist = Vector3.Distance(transform.position, npc.transform.position);
-            if (dist < transform.localScale.x)
+                if (cars_dist[i] < transform.localScale.x)
+                {
+                    m_cars[i].UpdateCurrentCheckpoint(check_point_num + 1);
+
+                    if (m_cars[i].name.Contains("NPC"))
+                    {
+                        npcs[i % npcs.Length].SetDestination(sc_CheckpointManager.GetNextCheckpointPosition(check_point_num + 1));
+                    }
+
+                    cars_opened[i] = true;
+                }
+            }
+            else
             {
-                npc.SetDestination(sc_CheckpointManager.GetNextCheckpointPosition(check_point_num + 1));
-                opened = true;
+                cars_timer[i] += Time.deltaTime;
+                if (cars_timer[i] > 10)
+                {
+                    cars_opened[i] = false;
+                    cars_timer[i] = 0;
+                }
             }
         }
     }

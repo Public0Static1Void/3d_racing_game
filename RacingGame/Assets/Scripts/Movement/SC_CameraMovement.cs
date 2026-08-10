@@ -48,7 +48,7 @@ public class SC_CameraMovement : MonoBehaviour
 
         // Get the object velocity
         float new_distance = 0;
-        float speed_t = m_target_physics.velocity.magnitude / (m_target_physics.speed);
+        float speed_t = m_target_physics.current_velocity / (m_target_physics.speed * 3.6f);
         if (speed_t < 0.5f)
         {
             new_distance = Mathf.Lerp(distance, m_target_physics.current_velocity + m_start_distance, Time.deltaTime * speed_t);
