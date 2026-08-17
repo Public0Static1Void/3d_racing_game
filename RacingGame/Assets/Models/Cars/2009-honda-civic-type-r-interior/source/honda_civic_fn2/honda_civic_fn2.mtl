@@ -1,0 +1,792 @@
+newmtl TAILLIGHT_PLASTIC
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\darkgrey.dds
+map_Ks texture\taillight-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl TAILLLIGHT_CHROME
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\chrome.dds
+map_Ks texture\taillight-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl TAILLLIGHT_PLASTIC_GLOSS
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 0.4 0.4 0.4
+Ns 110
+illum 2
+map_Kd texture\darkergrey.dds
+map_Ks texture\taillight-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl TAILLLIGHT_CHROME_RED_NM
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\red.dds
+bump texture\WINGMIRROR-GLASS.dds
+
+newmtl TAILLIGHT_CHROME_INDICATOR_NM
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\chrome.dds
+bump texture\WINGMIRROR-GLASS.dds
+
+newmtl TAILLLIGHT_GLASS_RED
+Ka 0.3 0.3 0.3
+Kd 0.5 0.5 0.5
+Ks 0.2 0.2 0.2
+Ns 850
+illum 2
+map_Kd texture\red_glass.dds
+
+newmtl HEADLIGHT_GLASS_ORANGE
+Ka 0.3 0.3 0.3
+Kd 0.5 0.5 0.5
+Ks 0.2 0.2 0.2
+Ns 850
+illum 2
+map_Kd texture\glass-orange.dds
+
+newmtl TAILLIGHT_GLASS_RED
+Ka 0.3 0.3 0.3
+Kd 0.5 0.5 0.5
+Ks 0.2 0.2 0.2
+Ns 850
+illum 2
+map_Kd texture\red_glass.dds
+
+newmtl TAILLLIGHT_GLASS_CLEAR_15_NM
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 2 2 2
+Ns 850
+illum 2
+map_Kd texture\glass.dds
+bump texture\15.dds
+
+newmtl CHROME-NO_AO
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\chrome.dds
+
+newmtl ext-plastic-gloss
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 0.4 0.4 0.4
+Ns 110
+illum 2
+map_Kd texture\darkergrey.dds
+map_Ks texture\ext-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl HEADLIGHT_CHROME
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\chrome.dds
+map_Ks texture\headlight-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl HEADLIGHT_CHROME_NM
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\chrome.dds
+bump texture\Wave.png
+
+newmtl HEADLIGHT_PLASTIC
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\darkgrey.dds
+map_Ks texture\headlight-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl HEADLIGHT_PLASTIC_GLOSS
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 0.4 0.4 0.4
+Ns 110
+illum 2
+map_Kd texture\darkergrey.dds
+map_Ks texture\headlight-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl int-glass
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 2 2 2
+Ns 850
+illum 2
+map_Kd texture\glass.dds
+
+newmtl badge
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\interior_lod0.dds
+
+newmtl int-leather-perf
+Ka 0.6 0.6 0.6
+Kd 0.35 0.35 0.35
+Ks 0.2 0.2 0.2
+Ns 10
+illum 2
+map_Kd texture\leather_blk_gt.dds
+map_Ks texture\int-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl int-leather
+Ka 0.6 0.6 0.6
+Kd 0.35 0.35 0.35
+Ks 0.2 0.2 0.2
+Ns 10
+illum 2
+map_Kd texture\leather_blk_gt.dds
+map_Ks texture\int-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl STITCH
+Ka 0.35 0.35 0.35
+Kd 0.35 0.35 0.35
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\cuciture.dds
+
+newmtl int-2-plastic-smooth
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\darkgrey.dds
+map_Ks texture\int-2-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl int-2-chrome-satin
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\chrome.dds
+map_Ks texture\int-2-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl ext-chrome
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\chrome.dds
+map_Ks texture\ext-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl ext-plastic-red-gloss
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 1 1 1
+Ns 50
+illum 2
+map_Kd texture\red.dds
+map_Ks texture\ext-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl int-2-plastic-rough
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\darkgrey.dds
+map_Ks texture\int-2-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl int-2-chrome
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\chrome.dds
+map_Ks texture\int-2-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl Material_#544664
+Ka 0.1 0.1 0.1
+Kd 0.15 0.15 0.15
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\PlasticDetail.dds
+map_Ks texture\hon_civictyper_07_cockpit_interior_metal_Ambient76.dds
+bump texture\FLAT_NM.dds
+
+newmtl solid
+Ka 0.03 0.03 0.03
+Kd 0.03 0.03 0.03
+Ks 0.01 0.01 0.01
+Ns 6
+illum 2
+map_Kd texture\black2.dds
+
+newmtl int-seat-inserts
+Ka 0.25 0.25 0.25
+Kd 0.25 0.25 0.25
+Ks 0.1 0.1 0.1
+Ns 50
+illum 2
+map_Kd texture\97.dds
+map_Ks texture\int-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl int-1-carpet-red
+Ka 0.25 0.25 0.25
+Kd 0.25 0.25 0.25
+Ks 0.1 0.1 0.1
+Ns 50
+illum 2
+map_Kd texture\CARPET.dds
+map_Ks texture\int-1-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl plastic
+Ka 0.16 0.16 0.16
+Kd 0.16 0.16 0.16
+Ks 0.1 0.1 0.1
+Ns 60
+illum 2
+map_Kd texture\metal_detail2.dds
+map_Ks texture\interior_lod0.dds
+bump texture\FLAT_NM.dds
+
+newmtl digital_gauge
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 0.05 0.05 0.05
+Ns 10
+illum 2
+map_Kd texture\black2.dds
+
+newmtl Material_#73322
+Ka 0.2 0.2 0.2
+Kd 0.2 0.2 0.2
+Ks 0 0 0
+Ns 30
+illum 2
+map_Kd texture\interior_lod0_back_ground.dds
+
+newmtl glass
+Ka 0.4 0.4 0.4
+Kd 0.2 0.2 0.2
+Ks 0.7 0.7 0.7
+Ns 200
+illum 2
+map_Kd texture\glass.dds
+
+newmtl Material_#16
+Ka 0.5 0.5 0.5
+Kd 0.01 0.01 0.01
+Ks 0.1 0.1 0.1
+Ns 30
+illum 2
+map_Kd texture\hon_civictyper_07_tachbck.png
+
+newmtl Material_#26323
+Ka 0.3 0.3 0.3
+Kd 0.3 0.3 0.3
+Ks 0 0 0
+Ns 30
+illum 2
+map_Kd texture\33333333.dds
+
+newmtl gauge_emissive
+Ka 0.2 0.2 0.2
+Kd 0.05 0.05 0.05
+Ks 0.05 0.05 0.05
+Ns 10
+illum 2
+map_Kd texture\interior_lod0.dds
+
+newmtl DASH_NUMBERS
+Ka 0.35 0.35 0.35
+Kd 0.35 0.35 0.35
+Ks 0.05 0.05 0.05
+Ns 30
+illum 2
+map_Kd texture\interior_lod0_numbers.dds
+
+newmtl Material_#46677
+Ka 0.11 0.11 0.11
+Kd 0.11 0.11 0.11
+Ks 0.2 0.2 0.2
+Ns 30
+illum 2
+map_Kd texture\PlasticDetail.dds
+map_Ks texture\hon_civictyper_07_cockpit_interior_plastic_Ambient7575.dds
+bump texture\FLAT_NM.dds
+
+newmtl Material_#319
+Ka 0.2 0.2 0.2
+Kd 0.8 0.8 0.8
+Ks 0 0 0
+Ns 1
+illum 2
+map_Kd texture\darkgrey.dds
+
+newmtl Tex_20400_0
+Ka 0.2 0.2 0.2
+Kd 0 0 0
+Ks 0 0 0
+Ns 30
+illum 2
+map_Kd texture\Tex_20400_0.dds
+
+newmtl pribors1.004
+Ka 0.1 0.1 0.1
+Kd 0 0 0
+Ks 0 0 0
+Ns 0
+illum 2
+map_Kd texture\Symbols.png
+
+newmtl Material_#4676757
+Ka 0.12 0.12 0.12
+Kd 0.1 0.1 0.1
+Ks 0.2 0.2 0.2
+Ns 30
+illum 2
+map_Kd texture\PlasticDetail22.dds
+map_Ks texture\465466.dds
+bump texture\FLAT_NM.dds
+
+newmtl Material_#253132
+Ka 0.35 0.35 0.35
+Kd 0.07 0.07 0.07
+Ks 0.05 0.05 0.05
+Ns 30
+illum 2
+map_Kd texture\digitalgauge2222.dds
+
+newmtl gauge_needle
+Ka 0.5 0.5 0.5
+Kd 0.2 0.2 0.2
+Ks 0.1 0.1 0.1
+Ns 15
+illum 2
+map_Kd texture\interior_lod0.dds
+
+newmtl Material_#505656
+Ka 0.588 0.588 0.588
+Kd 0.588 0.588 0.588
+Ks 0.9 0.9 0.9
+Ns 10
+illum 2
+map_Kd texture\digitalgaugecapture.dds
+
+newmtl cloth
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\black2.dds
+
+newmtl int-seats
+Ka 0.25 0.25 0.25
+Kd 0.25 0.25 0.25
+Ks 0.1 0.1 0.1
+Ns 50
+illum 2
+map_Kd texture\alcantara_grey.dds
+map_Ks texture\int-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl mirrorMiddle
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\MIRROR_PLACEMENT.png
+
+newmtl int-1-headliner-black
+Ka 0.25 0.25 0.25
+Kd 0.25 0.25 0.25
+Ks 0.1 0.1 0.1
+Ns 50
+illum 2
+map_Kd texture\alcantara_grey.dds
+map_Ks texture\int-1-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl int-2-plastic-red
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\red.dds
+map_Ks texture\int-2-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl RECARO
+Ka 0.35 0.35 0.35
+Kd 0.35 0.35 0.35
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\121.dds
+
+newmtl BODY
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 1 1 1
+Ns 50
+illum 2
+map_Kd texture\metal_detail.dds
+map_Ks texture\ExtBodyAO.dds
+bump texture\FLAT_NM.dds
+
+newmtl GRILLE
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\grille1.dds
+bump texture\grille1NM.dds
+
+newmtl ext-chrome-satin
+Ka 0.35 0.35 0.35
+Kd 0.25 0.25 0.25
+Ks 0.3 0.3 0.3
+Ns 50
+illum 2
+map_Kd texture\chrome.dds
+map_Ks texture\ext-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl ext-plastic
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\darkgrey.dds
+map_Ks texture\ext-occlusion.dds
+bump texture\FLAT_NM.dds
+
+newmtl window
+Ka 0.1 0.1 0.1
+Kd 0.2 0.2 0.2
+Ks 2 2 2
+Ns 400
+illum 2
+map_Kd texture\glass.dds
+
+newmtl black
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 0 0 0
+Ns 6
+illum 2
+map_Kd texture\black2.dds
+
+newmtl rubber
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 6
+illum 2
+map_Kd texture\black2.dds
+
+newmtl mirrorLeft
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\MIRROR_PLACEMENT.png
+
+newmtl rubber_trim
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 6
+illum 2
+map_Kd texture\black2.dds
+
+newmtl mirrorRight
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\MIRROR_PLACEMENT.png
+
+newmtl Material_#5024342
+Ka 0.4 0.4 0.4
+Kd 0.35 0.35 0.35
+Ks 0.05 0.05 0.05
+Ns 30
+illum 2
+map_Kd texture\red_alcantara1.dds
+map_Ks texture\hon_civictyper_07_cockpit_seatL_cloth_Ambient.dds
+bump texture\FLAT_NM.dds
+
+newmtl frame
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 6
+illum 2
+map_Kd texture\nodamage_lod0.dds
+
+newmtl plastic2
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 6
+illum 2
+map_Kd texture\nodamage_lod0.dds
+
+newmtl Material_#72332
+Ka 0.15 0.15 0.15
+Kd 0.15 0.15 0.15
+Ks 0 0 0
+Ns 30
+illum 2
+map_Kd texture\hon_civictyper_07_lod0_exhaustLa_black_Ambient Occlusion _MR_1.dds
+
+newmtl HEADLIGHT-GLASS
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 2 2 2
+Ns 850
+illum 2
+map_Kd texture\glass.dds
+
+newmtl undercarriage
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\undercarriage.png
+
+newmtl tail_light_lod0
+Ka 0.5 0.5 0.5
+Kd 0.2 0.2 0.2
+Ks 0.1 0.1 0.1
+Ns 50
+illum 2
+map_Kd texture\lights_lod0.dds
+
+newmtl TAILLLIGHT_GLASS_CLEAR_NM
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 2 2 2
+Ns 850
+illum 2
+map_Kd texture\glass.dds
+bump texture\WINGMIRROR-GLASS.dds
+
+newmtl TAILLLIGHT_GLASS_CLEAR
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 2 2 2
+Ns 850
+illum 2
+map_Kd texture\glass.dds
+
+newmtl TAILLLIGHT_GLASS_RED_NM
+Ka 0.3 0.3 0.3
+Kd 0.5 0.5 0.5
+Ks 0.2 0.2 0.2
+Ns 850
+illum 2
+map_Kd texture\red_glass.dds
+bump texture\DL_light_nm.dds
+
+newmtl WINGMIRROR_GLASS_NM
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 2 2 2
+Ns 850
+illum 2
+map_Kd texture\glass.dds
+bump texture\WINGMIRROR-GLASS.dds
+
+newmtl RearPlate
+Ka 0.4 0.4 0.4
+Kd 0.25 0.25 0.25
+Ks 0.3 0.3 0.3
+Ns 50
+illum 2
+map_Kd texture\ONVISU Swiss.png
+
+newmtl brake_calipers
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 1 1 1
+Ns 50
+illum 2
+map_Kd texture\caliper_colour.dds
+map_Ks texture\caliper.dds
+bump texture\flat_N.dds
+
+newmtl brake_caliper_detail
+Ka 0.25 0.25 0.25
+Kd 0.2 0.2 0.2
+Ks 0.5 0.5 0.5
+Ns 50
+illum 2
+map_Kd texture\caliper_detail.dds
+bump texture\caliper_detail_nm.dds
+
+newmtl brake_calipers_pipes
+Ka 0.2 0.2 0.2
+Kd 0.2 0.2 0.2
+Ks 1 1 1
+Ns 200
+illum 2
+map_Kd texture\chrome.dds
+
+newmtl INTERCOOLER-HKS
+Ka 0.2 0.2 0.2
+Kd 0.2 0.2 0.2
+Ks 0.4 0.4 0.4
+Ns 50
+illum 2
+map_Kd texture\Cooleris.dds
+bump texture\Cooleris-NM.dds
+
+newmtl INTERCOOLER-CHROME
+Ka 0.5 0.5 0.5
+Kd 0.5 0.5 0.5
+Ks 10 10 10
+Ns 5000
+illum 2
+map_Kd texture\chrome.dds
+
+newmtl INTERCOOLER-PIPES-BLUE
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 0.4 0.4 0.4
+Ns 150
+illum 2
+map_Kd texture\melyna.dds
+
+newmtl Material_#796
+Ka 0.3 0.3 0.3
+Kd 0.3 0.3 0.3
+Ks 0.1 0.1 0.1
+Ns 20
+illum 2
+map_Kd texture\mat_grey.dds
+bump texture\flat_nm.dds
+
+newmtl TYRES
+Ka 0.2 0.2 0.2
+Kd 0.1 0.1 0.1
+Ks 0 0 0
+Ns 1
+illum 2
+map_Kd texture\advan-neova-ad09_2D_View.png
+bump texture\advan-neova-ad09_Normal_OpenGL.png
+
+newmtl Material.008
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 1 1 1
+Ns 50
+illum 2
+map_Kd texture\Grey.dds
+map_Ks texture\spoke baked.dds
+bump texture\flat_nm.dds
+
+newmtl Material.005
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 0.4 0.4 0.4
+Ns 110
+illum 2
+map_Kd texture\darkergrey.dds
+map_Ks texture\aircap baked.dds
+bump texture\flat_nm.dds
+
+newmtl Material.006
+Ka 0.4 0.4 0.4
+Kd 0.4 0.4 0.4
+Ks 1 1 1
+Ns 50
+illum 2
+map_Kd texture\Grey.dds
+bump texture\JIL VIA.png
+
+newmtl Material.002
+Ka 1 1 1
+Kd 0 0 0
+Ks 0 0 0
+Ns 1
+illum 2
+map_Kd texture\NULL.dds
+bump texture\NULL.dds
+
+newmtl Material.003
+Ka 0.35 0.35 0.35
+Kd 0.35 0.35 0.35
+Ks 0.1 0.1 0.1
+Ns 10
+illum 2
+map_Kd texture\Mugen2.png
+bump texture\Mugen normal map.png
+
+newmtl Material.007
+Ka 0.1 0.1 0.1
+Kd 0.1 0.1 0.1
+Ks 0.4 0.4 0.4
+Ns 110
+illum 2
+map_Kd texture\CENTRECAP.dds
+map_Ks texture\center cap baked.dds
+bump texture\flat_nm.dds
+
+newmtl rotor
+Ka 0.25 0.25 0.25
+Kd 0.35 0.35 0.35
+Ks 0.178 0.178 0.178
+Ns 40
+illum 2
+map_Kd texture\rotor.dds
+bump texture\rotor_nm.dds
+

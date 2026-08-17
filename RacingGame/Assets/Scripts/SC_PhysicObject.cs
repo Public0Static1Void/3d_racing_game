@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.Hierarchy;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class SC_PhysicObject : MonoBehaviour
@@ -49,6 +47,8 @@ public class SC_PhysicObject : MonoBehaviour
     public bool onGround = false;
     private float m_ground_timer = 0f;
     public const float MAX_WALKABLE_ANGLE = 75;
+    [HideInInspector] public Action collision_event;
+    [HideInInspector] public Action<Vector3, Vector3> regular_collision_event;
 
     [Header("Wheels")]
     [SerializeField] private List<Transform> m_wheels;
@@ -77,9 +77,17 @@ public class SC_PhysicObject : MonoBehaviour
     // State variables
     public bool drifting = false;
 
+    [Header("Control")]
+    public bool can_drive = true;
+
+
+    private Collider m_collider;
+
 
     protected virtual void Start()
     {
+        m_collider = GetComponent<Collider>();
+
         // Store the current position and rotation
         _pos_current = transform.position;
         _pos_prev = transform.position - transform.forward;
@@ -269,6 +277,9 @@ public class SC_PhysicObject : MonoBehaviour
                 float turn_angle = Vector3.SignedAngle(dir_horizontal, reflected_horizontal.normalized, Vector3.up);
                 rotation.y = turn_angle * bounciness;
             }
+
+            collision_event?.Invoke();
+            regular_collision_event?.Invoke(hit.point, hit.transform.forward);
         }
     }
 
@@ -317,6 +328,19 @@ public class SC_PhysicObject : MonoBehaviour
             _pos_current += push_dir * push_dist * my_share;
 
             float collision_speed = Vector3.Dot(vel - otherObject.velocity, -push_dir);
+
+            float probe_dist = half_extents.magnitude + 1;
+            Vector3 probe_on_A = centerAtImpact - push_dir * probe_dist; // Point outside the collider on the B's side
+            Vector3 probe_on_B = centerAtImpact + push_dir * probe_dist; // Pint inside the collider on A's side
+
+            Vector3 surface_A = m_collider.ClosestPoint(probe_on_A);
+            Vector3 surface_B = hit.ClosestPoint(probe_on_B);
+
+            Vector3 contact_point = 
+                sweepHit.point != Vector3.zero 
+                ? sweepHit.point
+                : 0.5f * (surface_A + surface_B) + Forward;
+
             if (collision_speed > 0)
             {
                 float impulse = collision_speed * (1 + bounciness) * (otherObject.mass / total_mass);
@@ -324,18 +348,25 @@ public class SC_PhysicObject : MonoBehaviour
                 vel += push_dir * impulse;
 
                 // Adds a rotation
-                Vector3 contact_point = centerAtImpact - push_dir * (half_extents.magnitude * 0.5f);
                 Vector3 lever_arm = contact_point - _pos_current;
                 lever_arm.y = 0;
                 float torque_dir = Mathf.Sign(Vector3.Cross(lever_arm, push_dir).y);
                 float spin_impulse = torque_dir * impulse * lever_arm.magnitude * 0.5f * (otherObject.mass / total_mass);
 
-                Debug.Log($"Torque applied: {spin_impulse * collision_rotation_multiplier}");
-
                 rotation.y += spin_impulse * collision_rotation_multiplier;
 
-                m_current_acceleration = vel.magnitude * 2; /// Penalizes less the car collisions
+                m_current_acceleration = vel.magnitude * 2; /// Penalizes less the car collisions 
+
+                // Safe invoke of the methods subscribed to the event                    
+                if (collision_speed > 0)
+                {
+                    collision_event?.Invoke();
+                    contact_point.y = m_car.position.y + m_car.parent.localScale.y * 0.05f;
+                    regular_collision_event?.Invoke(contact_point, hit.transform.forward);
+                }
             }
+
+            
         }
     }
 
@@ -376,7 +407,7 @@ public class SC_PhysicObject : MonoBehaviour
     {
         m_wheels_rotation[index] += velocity.magnitude * current_velocity * Time.fixedDeltaTime * 500; // vertical rotation
 
-        float steer_y = index > 1 ? rotation.y * 22.5f : 0;
+        float steer_y = index > 1 ? rotation.y * 45 : 0;
 
         m_wheels[index].localRotation = Quaternion.Euler(0, steer_y, 0) * Quaternion.Euler(m_wheels_rotation[index], 0, 0);
         if (euler_wheel_correction != Vector3.zero)

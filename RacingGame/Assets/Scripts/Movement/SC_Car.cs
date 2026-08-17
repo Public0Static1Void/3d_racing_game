@@ -18,7 +18,7 @@ public class SC_Car : SC_PhysicObject
         base.Update();
 
         if (m_input == Vector2.zero && (m_current_acceleration > 0.01f || m_current_acceleration < -0.01f))
-            m_current_acceleration = Mathf.MoveTowards(m_current_acceleration, 0, acceleration * Time.deltaTime);
+            m_current_acceleration = Mathf.MoveTowards(m_current_acceleration, 0, acceleration * Time.deltaTime * 4);
     }
 
     #region PhysicFunctions
@@ -27,6 +27,12 @@ public class SC_Car : SC_PhysicObject
     /// </summary>
     private void HandleInputSpeed(ref Vector3 vel, ref Vector3 rot)
     {
+        if (!can_drive)
+        {
+            m_current_acceleration = 0;
+            return;
+        }
+
         if (onGround)
         {
             if (m_input.y > last_direction && last_direction != 0 && m_current_acceleration > 0)
@@ -46,7 +52,7 @@ public class SC_Car : SC_PhysicObject
         }
         /// A dot tells you how much a vector is pointing in the direction of another
         float speedForward = Vector3.Dot(vel, transform.forward);
-        rot.y += m_input.x * rotation_speed * Mathf.Abs(speedForward) * Time.fixedDeltaTime;
+        rot.y += m_input.x * rotation_speed * Mathf.Abs(speedForward * 2) * Time.fixedDeltaTime;
     }
 
     protected override void HandleGroundFriction(ref Vector3 vel, bool rotating)

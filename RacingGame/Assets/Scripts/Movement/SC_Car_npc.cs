@@ -69,12 +69,15 @@ public class SC_Car_npc : SC_PhysicObject
     {
         SyncAgentPosition();
 
-        if (m_state == DriveState.Reversing)
-            HandleReversing();
-        else
-            HandleNavigation();
+        if (can_drive)
+        {
+            if (m_state == DriveState.Reversing)
+                HandleReversing();
+            else
+                HandleNavigation();
 
-        UpdateStuckDetection();
+            UpdateStuckDetection();
+        }
 
         base.FixedUpdate();
     }

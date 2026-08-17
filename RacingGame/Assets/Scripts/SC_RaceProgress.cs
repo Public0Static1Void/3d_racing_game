@@ -21,9 +21,14 @@ public class SC_RaceProgress : MonoBehaviour
     {
         if (current_checkpoint == new_checkpoint) return;
 
-        current_checkpoint = new_checkpoint;
-        if (new_checkpoint == m_checkpointManager.checkpoints.Length)
+        if (new_checkpoint == m_checkpointManager.checkpoints.Length - 1 && current_checkpoint > 0)
+        {
             lap_count++;
+            current_checkpoint = 0;
+            return;
+        }
+
+        current_checkpoint = new_checkpoint;
     }
     public float GetSegmentT()
     {
@@ -50,8 +55,9 @@ public class SC_RaceProgress : MonoBehaviour
         return lap_count * m_totalCheckpoints + current_checkpoint + segment_t;
     }
 
-    public float DistanceToNextCheckpoint()
+    public float DistanceToCurrentCheckpoint()
     {
+        if (current_checkpoint > m_checkpointManager.checkpoints.Length) current_checkpoint = m_checkpointManager.checkpoints.Length - 1;
         Transform next = m_checkpointManager.checkpoints[current_checkpoint].transform;
         return Vector3.Distance(transform.position, next.position);
     }

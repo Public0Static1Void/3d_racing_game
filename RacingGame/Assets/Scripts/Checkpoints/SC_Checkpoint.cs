@@ -21,8 +21,13 @@ public class SC_Checkpoint : MonoBehaviour
     {
         sc_CheckpointManager = SC_CheckpointManager.instance;
 
-        npcs = FindObjectsByType<SC_Car_npc>(FindObjectsSortMode.None);
         m_cars = FindObjectsByType<SC_RaceProgress>(FindObjectsSortMode.None);
+        npcs = new SC_Car_npc[m_cars.Length];
+        for (int i = 0; i < m_cars.Length; i++)
+        {
+            npcs[i] = m_cars[i].GetComponent<SC_Car_npc>();
+        }
+
         cars_dist = new float[m_cars.Length];
         cars_timer = new float[m_cars.Length];
         cars_opened = new bool[m_cars.Length];
@@ -42,9 +47,9 @@ public class SC_Checkpoint : MonoBehaviour
                 {
                     m_cars[i].UpdateCurrentCheckpoint(check_point_num + 1);
 
-                    if (m_cars[i].name.Contains("NPC"))
+                    if (npcs[i] != null)
                     {
-                        npcs[i % npcs.Length].SetDestination(sc_CheckpointManager.GetNextCheckpointPosition(check_point_num + 1));
+                        npcs[i].SetDestination(sc_CheckpointManager.GetNextCheckpointPosition(check_point_num + 1));
                     }
 
                     cars_opened[i] = true;
@@ -53,7 +58,7 @@ public class SC_Checkpoint : MonoBehaviour
             else
             {
                 cars_timer[i] += Time.deltaTime;
-                if (cars_timer[i] > 10)
+                if (cars_timer[i] > 0.1f)
                 {
                     cars_opened[i] = false;
                     cars_timer[i] = 0;
