@@ -5,6 +5,8 @@ Shader "Unlit/SH_CameraEffect"
         _BlurAmount ("Blur Amount", Range(0,1)) = 0
         _ChromaAmount ("Chromatic Aberration", Range(0,0.05)) = 0
         _VignetteAmount ("Vignette", Range(0,1)) = 0
+        _PixelAmount("Pixel Amount", Range(0, 1)) = 0
+        _PixelCount("Pixel Count", Range(1, 852)) = 128
     }
     SubShader
     {
@@ -24,6 +26,8 @@ Shader "Unlit/SH_CameraEffect"
             float _BlurAmount;
             float _ChromaAmount;
             float _VignetteAmount;
+            float _PixelAmount;
+            float _PixelCount;
 
             float3 SampleBlurred(float2 uv, float2 dir, float dist)
             {
@@ -39,9 +43,20 @@ Shader "Unlit/SH_CameraEffect"
                 return col / SAMPLES;
             }
 
+            float2 Pixelate(float2 uv)
+            {
+                float2 texel_size = _BlitTexture_TexelSize.zw;
+                float aspect = texel_size.x / texel_size.y;
+
+                float2 grid_size = float2(_PixelCount, _PixelCount / aspect);
+                float2 pixUV = floor(uv * grid_size) / grid_size + (0.5 / grid_size);
+
+                return lerp(uv, pixUV, _PixelAmount);
+            }
+
             float4 Frag(Varyings input) : SV_Target
             {
-                float2 uv = input.texcoord;
+                float2 uv = Pixelate(input.texcoord);
                 float2 center = float2(0.5, 0.5);
                 float2 dir = uv - center;
                 float dist = length(dir);

@@ -27,6 +27,9 @@ Material:
     m_Floats:
     - _BlurAmount: 0
     - _ChromaAmount: 0
+    - _PixelAmount: 1
+    - _PixelCount: 852
+    - _PixelateAmount: 1
     - _VignetteAmount: 0
     m_Colors: []
   m_BuildTextureStacks: []

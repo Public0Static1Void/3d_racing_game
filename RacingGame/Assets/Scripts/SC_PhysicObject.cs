@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum NPC_PERSONALITY { AGGRESIVE, NEUTRAL, DEFENSIVE }
+public enum NPC_CURRENT_STATE { RACING, CHASING, OVERTAKING, DEFENDING, BLOCKING, RECOVERING }
+
 public class SC_PhysicObject : MonoBehaviour
 {
     [Header("Stats")]
@@ -11,7 +14,8 @@ public class SC_PhysicObject : MonoBehaviour
     public float acceleration = 1f;
     public float rotation_speed = 1f;
     public float terrain_rotate_speed = 10f;
-    public float gravity_multipler = 1f;
+    public float gravity_multipler = 10;
+    public float pressure_range = 5;
     [Range(0, 1)]
     public float bounciness = 0.85f;
     [Range(0, 1)]

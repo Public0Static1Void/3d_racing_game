@@ -5,6 +5,8 @@ public class SC_Checkpoint : MonoBehaviour
 {
     private SC_CheckpointManager sc_CheckpointManager;
 
+    private SC_RacePoint m_racePoint;
+
     private SC_Car_npc[] npcs;
     private SC_RaceProgress[] m_cars;
     public bool opened = false;
@@ -19,6 +21,8 @@ public class SC_Checkpoint : MonoBehaviour
     private float m_timer = 0;
     private void Start()
     {
+        m_racePoint = GetComponent<SC_RacePoint>();
+
         sc_CheckpointManager = SC_CheckpointManager.instance;
 
         m_cars = FindObjectsByType<SC_RaceProgress>(FindObjectsSortMode.None);
@@ -66,6 +70,8 @@ public class SC_Checkpoint : MonoBehaviour
             }
         }
     }
+
+    public SC_RacePoint GetRacePoint() => m_racePoint;
 
     private void OnDrawGizmos()
     {
